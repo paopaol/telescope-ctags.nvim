@@ -1,4 +1,5 @@
 local telescope_installed, telescope = pcall(require, 'telescope')
+local action_state = require('telescope.actions.state')
 
 if not telescope_installed then
   error('This plugins requires nvim-telescope/telescope.nvim')
@@ -26,8 +27,8 @@ local function ctags_function(opts)
     }
   end
 
-  local display_items = {{width = 4}, {remaining = true}}
-  table.insert(display_items, 2, {width = 100})
+  local display_items = { { width = 4 }, { remaining = true } }
+  table.insert(display_items, 2, { width = 100 })
 
   local displayer = entry_display.create {
     separator = " │ ",
@@ -36,8 +37,8 @@ local function ctags_function(opts)
 
   local make_display = function(entry)
     return displayer {
-      {entry.lnum, 'TelescopeResultsSpecialComment'},
-      {entry.value, 'TelescopeResultsFunction'}
+      { entry.lnum, 'TelescopeResultsSpecialComment' },
+      { entry.value, 'TelescopeResultsFunction' }
     }
   end
 
@@ -64,14 +65,13 @@ local function ctags_function(opts)
     previewer = conf.grep_previewer(opts),
     attach_mappings = function(prompt_bufnr)
       actions_set.select:replace(function()
-        local entry = actions.get_selected_entry()
+        local entry = action_state.get_selected_entry(prompt_bufnr)
         actions.close(prompt_bufnr)
-        vim.cmd(string.format('e %s', entry.filename))
-        vim.cmd(string.format('normal! %dG', entry.lnum))
+        vim.cmd(string.format('normal! %dGzz', entry.lnum))
       end)
       return true
     end
   }):find()
 end
 
-return telescope.register_extension {exports = {functions = ctags_function}}
+return telescope.register_extension { exports = { functions = ctags_function } }
